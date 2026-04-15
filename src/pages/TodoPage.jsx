@@ -23,7 +23,13 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import InfoIcon from "@mui/icons-material/Info";
 import { useSelector, useDispatch } from "react-redux";
-import { addTodo, toggleTodo, deleteTodo, editTodo, fetchTodos } from "../store/todoSlice";
+import {
+  fetchTodos,
+  addTodosAPI,
+  editTodosAPI,
+  toggleTodo,
+  deleteTodoAPI,
+} from "../store/todoSlice";
 
 function TodoList() {
   const { items: todos, status, error } = useSelector((state) => state.todos);
@@ -52,7 +58,7 @@ function TodoList() {
     e.preventDefault();
     if (inputToDo.trim() === "") return;
 
-    dispatch(addTodo(inputToDo.trim()));
+    dispatch(addTodosAPI(inputToDo.trim()));
     setInputToDo("");
   };
 
@@ -61,18 +67,18 @@ function TodoList() {
   };
 
   const handleDeleteTodo = (id) => {
-    dispatch(deleteTodo(id));
+    dispatch(deleteTodoAPI(id));
   };
 
   const handleEditTodo = (id, currentText) => {
     const newText = prompt("Edit your task:", currentText);
     if (newText !== null && newText.trim() !== "") {
-      dispatch(editTodo(id, newText.trim()));
+      dispatch(editTodosAPI({ _id: id, taskText: newText.trim() }));
     }
   };
 
   return (
-    <Container maxWidth="md" >
+    <Container maxWidth="md">
       <Paper elevation={3} sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2 }}>
         <Typography variant="h4" align="center" gutterBottom fontWeight="bold">
           Todo List
@@ -100,7 +106,7 @@ function TodoList() {
             variant="contained"
             type="submit"
             disableElevation
-            sx={{ minWidth: { sm: "100px" },}}>
+            sx={{ minWidth: { sm: "100px" } }}>
             Add
           </Button>
         </Box>
@@ -122,12 +128,11 @@ function TodoList() {
 
         {/* List Todo */}
         <List>
-          {status === "succeeded" && todos.length === 0 ? (
+          {status === "succeeded" && todos.length === 0 ?
             <Typography align="center" color="text.secondary" sx={{ py: 2 }}>
               No tasks yet!
             </Typography>
-          ) : (
-            todos.map((todo) => (
+          : todos.map((todo) => (
               <ListItem
                 key={todo._id || todo.id}
                 disablePadding
@@ -137,16 +142,20 @@ function TodoList() {
                       <IconButton
                         size="small"
                         color="primary"
-                        onClick={() => handleEditTodo(todo._id || todo.id, todo.taskText)}>
+                        onClick={() =>
+                          handleEditTodo(todo._id || todo.id, todo.taskText)
+                        }>
                         <EditIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
-                    
+
                     <Tooltip title="Description">
                       <IconButton
                         size="small"
                         color="info"
-                        onClick={(e) => handlePopoverEvent(e, todo._id || todo.id)}>
+                        onClick={(e) =>
+                          handlePopoverEvent(e, todo._id || todo.id)
+                        }>
                         <InfoIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
@@ -166,12 +175,12 @@ function TodoList() {
                       anchorEl={anchorEl}
                       onClose={handlePopoverClose}
                       anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left',
+                        vertical: "bottom",
+                        horizontal: "left",
                       }}
                       transformOrigin={{
-                        vertical: 'top',
-                        horizontal: 'center',
+                        vertical: "top",
+                        horizontal: "center",
                       }}>
                       <Typography sx={{ p: 2 }}>{todo.taskText}</Typography>
                     </Popover>
@@ -187,7 +196,7 @@ function TodoList() {
                 <ListItemText
                   primary={todo.taskText}
                   sx={{
-                    mr: { xs: 12, sm: 15 }, 
+                    mr: { xs: 12, sm: 15 },
                     "& .MuiListItemText-primary": {
                       overflow: "hidden",
                       textOverflow: "ellipsis",
@@ -199,7 +208,7 @@ function TodoList() {
                 />
               </ListItem>
             ))
-          )}
+          }
         </List>
       </Paper>
     </Container>

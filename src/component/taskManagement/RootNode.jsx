@@ -10,6 +10,8 @@ import {
 import AddRiskDialog from "./AddRiskDialog";
 import AddControlDialog from "./AddControlDialog";
 
+import NodeFooter from "./NodeFooter";
+
 export default function RootNode({ data }) {
   const [riskOpen, setRiskOpen] = React.useState(false);
   const [controlOpen, setControlOpen] = React.useState(false);
@@ -30,6 +32,7 @@ export default function RootNode({ data }) {
           backgroundColor: "#ffffff",
         }}>
         <CardContent sx={{ p: "20px" }}>
+
           <Typography
             variant="h6"
             sx={{
@@ -59,7 +62,7 @@ export default function RootNode({ data }) {
           <Divider sx={{ mb: 2, borderColor: "#f0f0f0" }} />
 
           {/* Typography text links */}
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "space-between" , gap: 1, mb: 2 }}>
             <Typography
               onClick={handleRiskOpen}
               variant="body2"
@@ -88,8 +91,15 @@ export default function RootNode({ data }) {
               + Add Control
             </Typography>
           </Box>
+
+          {/* Footer with Edit/Delete */}
+          <NodeFooter
+            onEdit={() => data.onEdit && data.onEdit(data)}
+            onDelete={() => data.onDelete && data.onDelete(data._id, "root")}
+          />
         </CardContent>
       </Card>
+
 
       <AddRiskDialog
         open={riskOpen}

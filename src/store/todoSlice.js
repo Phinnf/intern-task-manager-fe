@@ -1,60 +1,81 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { API_URL } from "../config/api";
 
-const API_URL = import.meta.env.VITE_API_URL;
-
-// Thunk for fetching todos
-export const fetchTodos = createAsyncThunk("todos/fetchTodos", async () => {
-  const response = await fetch(API_URL + "/api/todos");
+export const fetchTodos = createAsyncThunk("todos/fetchTodo", async () => {
+  const response = await fetch(`${API_URL}/api/todos`);
   if (!response.ok) {
-    throw new Error("Failed to fetch todos");
+    throw new Error(`Failed to fetch todos ${response.status}`);
   }
-  return response.json();
+  const result = await response.json();
+  return result.data;
 });
 
-const initialState = {
-  items: [],
-  status: "idle", // 'idle' | 'loading' | 'succeeded' | 'failed'
-  error: null,
-};
+export const addTodosAPI = createAsyncThunk(
+  "todos/addTodo",
+  async (taskText) => {
+    const newTodoData = { taskText, completed: false };
+    const response = await fetch(`${API_URL}/api/todos`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newTodoData),
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to add todo ${response.status}`);
+    }
+      const result = await response.json();
+      return result.data;
+  },
+);
+export const editTodosAPI = createAsyncThunk(
+  "todos/editTodo",
+  async (editTodoData) => {
+    const id = editTodoData._id;
+    const response = await fetch(`${API_URL}/api/todos/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(editTodoData),
+    });
+    if (!response.ok) throw new Error(`Failed to edit todo ${response.status}`);
+     const result = await response.json();
+     return result.data;
+  },
+);
+
+export const toggleTodo = createAsyncThunk("todos/toggleTodo", async (id, thunkAPI) => {
+  const state = thunkAPI.getState();
+  const existingTodo = state.todos.items.find((todo) => todo._id === id);
+  
+  const response = await fetch(`${API_URL}/api/todos/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ completed: !existingTodo.completed }),
+  });
+  if (!response.ok) throw new Error("Failed to toggle todo");
+  
+  const result = await response.json();
+  return result.data;
+});
+
+export const deleteTodoAPI = createAsyncThunk(
+  "todos/deleteTodo",
+  async (id) => {
+    const response = await fetch(`${API_URL}/api/todos/${id}`, {
+      method: "DELETE",
+    });
+    if (!response.ok)
+      throw new Error(`Failed to delete todo ${response.status}`);
+    return id;
+  },
+);
 
 const todoSlice = createSlice({
   name: "todos",
-  initialState,
-  reducers: {
-    addTodo: {
-      prepare: (taskText) => ({
-        payload: {
-          id: Date.now(),
-          taskText,
-          completed: false,
-        },
-      }),
-      reducer: (state, action) => {
-        state.items.push(action.payload);
-      },
-    },
-    toggleTodo: (state, action) => {
-      const todo = state.items.find((t) => t.id === action.payload);
-      if (todo) {
-        todo.completed = !todo.completed;
-      }
-    },
-    deleteTodo: (state, action) => {
-      state.items = state.items.filter((t) => t.id !== action.payload);
-    },
-    editTodo: {
-      prepare: (id, taskText) => ({
-        payload: { id, taskText },
-      }),
-      reducer: (state, action) => {
-        const { id, taskText } = action.payload;
-        const todo = state.items.find((t) => t.id === id);
-        if (todo) {
-          todo.taskText = taskText;
-        }
-      },
-    },
+  initialState: {
+    items: [],
+    status: "idle",
+    error: null,
   },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchTodos.pending, (state) => {
@@ -67,9 +88,27 @@ const todoSlice = createSlice({
       .addCase(fetchTodos.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
-      });
+      })
+      .addCase(addTodosAPI.fulfilled, (state, action) => {
+        state.items.push(action.payload);
+      })
+      .addCase(deleteTodoAPI.fulfilled, (state, action) => {
+        state.items = state.items.filter((todo) => todo._id !== action.payload);
+      })
+      .addMatcher(
+        (action) =>
+          action.type === editTodosAPI.fulfilled.type ||
+          action.type === toggleTodo.fulfilled.type,
+        (state, action) => {
+          const index = state.items.findIndex(
+            (todo) => todo._id === action.payload._id,
+          );
+          if (index !== -1) {
+            state.items[index] = action.payload;
+          }
+        },
+      );
   },
 });
 
-export const { addTodo, toggleTodo, deleteTodo, editTodo } = todoSlice.actions;
 export default todoSlice.reducer;

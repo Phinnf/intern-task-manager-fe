@@ -99,7 +99,6 @@ export default function ControlNode({ data }) {
               </Typography>
             </Box>
           </Box>
-          <Divider sx={{ borderColor: "#8d8d8d" }} />
           <NodeFooter 
             onEdit={() => data.onEdit && data.onEdit(data)} 
             onDelete={() => data.onDelete && data.onDelete(data._id, "control")} 

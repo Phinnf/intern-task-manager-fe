@@ -61,12 +61,16 @@ export default function AddControlDialog({
   React.useEffect(() => {
     const fetchRiskNodes = async () => {
       try {
-        const response = await fetch(API_URL + "/api/risk-nodes", {
+        const response = await fetch(`${API_URL}/api/risk-nodes`, {
           method: "GET",
         });
         const result = await response.json();
         if (result.success) {
-          setRiskNodes(result.data);
+          // FILTER: Only show risk nodes that belong to the current root node (defaultParentId)
+          const filteredRisks = result.data.filter(
+            (risk) => risk.parentId === defaultParentId,
+          );
+          setRiskNodes(filteredRisks);
         }
       } catch (error) {
         console.error("Error fetching risk nodes:", error);
@@ -76,7 +80,7 @@ export default function AddControlDialog({
     if (open) {
       fetchRiskNodes();
     }
-  }, [open]);
+  }, [open, defaultParentId]);
 
   // Handle input changes for form fields
   const handleChange = (e) => {
@@ -89,7 +93,7 @@ export default function AddControlDialog({
         setFormData((prev) => ({
           ...prev,
           parentId: value,
-          parentModel: "RootNode",
+          parentModel: defaultParentModel, // Use the prop value
         }));
       } else {
         setFormData((prev) => ({
@@ -109,8 +113,8 @@ export default function AddControlDialog({
     const isEdit = !!nodeToEdit;
     const url =
       isEdit ?
-        `http://localhost:4000/api/control-nodes/${nodeToEdit._id}`
-      : "http://localhost:4000/api/control-nodes";
+        `${API_URL}/api/control-nodes/${nodeToEdit._id}`
+      : `${API_URL}/api/control-nodes`;
 
     try {
       const response = await fetch(url, {
@@ -133,8 +137,7 @@ export default function AddControlDialog({
         window.location.reload();
       } else {
         alert(
-          `Failed to ${isEdit ? "update" : "create"} ControlNode: ` +
-            result.message,
+          `Failed to ${isEdit ? "update" : "create"} ControlNode: ${result.message}`,
         );
       }
     } catch (error) {

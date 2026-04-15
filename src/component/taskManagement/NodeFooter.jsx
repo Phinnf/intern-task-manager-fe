@@ -12,12 +12,12 @@ export default function NodeFooter({ onEdit, onDelete }) {
         pt: 1,
         mt: 2,
       }}>
-      <Typography
+      {/* <Typography
         variant="body2"
         color="primary"
         sx={{ cursor: "pointer", fontWeight: 500 }}>
         Info
-      </Typography>
+      </Typography> */}
       <Box>
         <Button
           size="small"

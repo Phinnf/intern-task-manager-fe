@@ -4,10 +4,13 @@ import {
   ReactFlow,
   Background,
   Controls,
+  Panel,
   applyEdgeChanges,
   applyNodeChanges,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import { Button } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 
 // Import Custom Nodes
 import RootNode from "./RootNode";
@@ -15,6 +18,7 @@ import RiskNode from "./RiskNode";
 import ControlNode from "./ControlNode";
 import AddRiskDialog from "./AddRiskDialog";
 import AddControlDialog from "./AddControlDialog";
+import AddRootDialog from "./AddRootDialog";
 
 // Register node types with React Flow
 const nodeTypes = {
@@ -31,14 +35,17 @@ export default function GRCReactFlow() {
   // STATE: for Edit Dialogs
   const [editRiskOpen, setEditRiskOpen] = useState(false);
   const [editControlOpen, setEditControlOpen] = useState(false);
+  const [addRootOpen, setAddRootOpen] = useState(false);
   const [selectedNode, setSelectedNode] = useState(null);
 
   const handleEditNode = useCallback((nodeData) => {
     setSelectedNode(nodeData);
     if (nodeData.type === "Risk") {
       setEditRiskOpen(true);
-    } else {
+    } else if (nodeData.type === "Control") {
       setEditControlOpen(true);
+    } else {
+      setAddRootOpen(true);
     }
   }, []);
 
@@ -46,7 +53,11 @@ export default function GRCReactFlow() {
     if (!window.confirm(`Are you sure you want to delete this ${type}?`))
       return;
 
-    const endpoint = type === "risk" ? "risk-nodes" : "control-nodes";
+    let endpoint = "";
+    if (type === "risk") endpoint = "risk-nodes";
+    else if (type === "control") endpoint = "control-nodes";
+    else endpoint = "root-nodes";
+
     try {
       const response = await fetch(`${API_URL}/api/${endpoint}/${id}`, {
         method: "DELETE",
@@ -93,15 +104,20 @@ export default function GRCReactFlow() {
         const rootNodes = rootData.data.map((item, index) => ({
           id: item._id,
           type: "rootNode",
-          position: { x: 0, y: index * 250 },
-          data: { ...item },
+          position: { x: 0, y: index * 350 },
+          data: {
+            ...item,
+            type: "Root",
+            onEdit: handleEditNode,
+            onDelete: handleDeleteNode,
+          },
         }));
 
         // --- Column 2: Risk Nodes (Position x: 400) ---
         const riskNodes = riskData.data.map((item, index) => ({
           id: item._id,
           type: "riskNode",
-          position: { x: 400, y: index * 250 },
+          position: { x: 400, y: index * 350 },
           data: {
             ...item,
             title: item.name,
@@ -126,7 +142,7 @@ export default function GRCReactFlow() {
         const controlNodes = controlData.data.map((item, index) => ({
           id: item._id,
           type: "controlNode",
-          position: { x: 800, y: index * 250 },
+          position: { x: 800, y: index * 350 },
           data: {
             ...item,
             title: item.name,
@@ -180,9 +196,36 @@ export default function GRCReactFlow() {
       >
         <Background color="#e0e0e0" /> {/* Dotted/Grid background */}
         <Controls /> {/* Zoom/Pan toolbar */}
+        <Panel position="top-left">
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={() => setAddRootOpen(true)}
+            sx={{
+              backgroundColor: "#e7000b",
+              fontWeight: "bold",
+              textTransform: "none",
+              borderRadius: "8px",
+              boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+              "&:hover": {
+                backgroundColor: "#115293",
+              },
+            }}>
+            Add Root Node
+          </Button>
+        </Panel>
       </ReactFlow>
 
       {/* Edit Dialogs */}
+      <AddRootDialog
+        open={addRootOpen}
+        handleClose={() => {
+          setAddRootOpen(false);
+          setSelectedNode(null);
+        }}
+        nodeToEdit={selectedNode}
+      />
       <AddRiskDialog
         open={editRiskOpen}
         handleClose={() => {
