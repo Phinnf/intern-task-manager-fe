@@ -14,7 +14,13 @@ import {
   Typography,
 } from "@mui/material";
 
-export default function AddControlDialog({ open, handleClose, defaultParentId, defaultParentModel = "RootNode", nodeToEdit }) {
+export default function AddControlDialog({
+  open,
+  handleClose,
+  defaultParentId,
+  defaultParentModel = "RootNode",
+  nodeToEdit,
+}) {
   const [formData, setFormData] = React.useState({
     parentId: defaultParentId,
     parentModel: defaultParentModel,
@@ -24,6 +30,7 @@ export default function AddControlDialog({ open, handleClose, defaultParentId, d
     owner: "",
     status: "Active",
   });
+  import { API_URL } from "../../config/api";
 
   const [riskNodes, setRiskNodes] = React.useState([]);
 
@@ -54,7 +61,7 @@ export default function AddControlDialog({ open, handleClose, defaultParentId, d
   React.useEffect(() => {
     const fetchRiskNodes = async () => {
       try {
-        const response = await fetch("http://localhost:4000/api/risk-nodes", {
+        const response = await fetch(API_URL + "/api/risk-nodes", {
           method: "GET",
         });
         const result = await response.json();
@@ -76,26 +83,35 @@ export default function AddControlDialog({ open, handleClose, defaultParentId, d
     // Extract 'name' (field identifier) and 'value' (user input) from the event target
     const { name, value } = e.target;
     if (name === "parentId") {
-        // If 'parentId' changes, check if it matches the default (RootNode) 
-        // to assign the correct 'parentModel' for the backend
-        if (value === defaultParentId) {
-            setFormData(prev => ({ ...prev, parentId: value, parentModel: "RootNode" }));
-        } else {
-            setFormData(prev => ({ ...prev, parentId: value, parentModel: "Risk" }));
-        }
+      // If 'parentId' changes, check if it matches the default (RootNode)
+      // to assign the correct 'parentModel' for the backend
+      if (value === defaultParentId) {
+        setFormData((prev) => ({
+          ...prev,
+          parentId: value,
+          parentModel: "RootNode",
+        }));
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          parentId: value,
+          parentModel: "Risk",
+        }));
+      }
     } else {
-        // Update standard fields by preserving existing values and overriding the specific field [name]
-        setFormData((prev) => ({ ...prev, [name]: value }));
+      // Update standard fields by preserving existing values and overriding the specific field [name]
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const isEdit = !!nodeToEdit;
-    const url = isEdit
-      ? `http://localhost:4000/api/control-nodes/${nodeToEdit._id}`
+    const url =
+      isEdit ?
+        `http://localhost:4000/api/control-nodes/${nodeToEdit._id}`
       : "http://localhost:4000/api/control-nodes";
-    
+
     try {
       const response = await fetch(url, {
         method: isEdit ? "PUT" : "POST",
@@ -109,11 +125,17 @@ export default function AddControlDialog({ open, handleClose, defaultParentId, d
       }
       const result = await response.json();
       if (result.success) {
-        console.log(`Control node ${isEdit ? 'updated' : 'created'} successfully:`, result.data);
+        console.log(
+          `Control node ${isEdit ? "updated" : "created"} successfully:`,
+          result.data,
+        );
         handleClose();
         window.location.reload();
       } else {
-        alert(`Failed to ${isEdit ? 'update' : 'create'} ControlNode: ` + result.message);
+        alert(
+          `Failed to ${isEdit ? "update" : "create"} ControlNode: ` +
+            result.message,
+        );
       }
     } catch (error) {
       console.error("Error connecting to backend:", error);

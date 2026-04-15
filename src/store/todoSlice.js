@@ -1,10 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-const API_URL = "http://localhost:4000/api/todos";
+const API_URL = import.meta.env.VITE_API_URL;
 
 // Thunk for fetching todos
 export const fetchTodos = createAsyncThunk("todos/fetchTodos", async () => {
-  const response = await fetch(API_URL);
+  const response = await fetch(API_URL + "/api/todos");
   if (!response.ok) {
     throw new Error("Failed to fetch todos");
   }

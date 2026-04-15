@@ -13,8 +13,14 @@ import {
   DialogTitle,
   Typography,
 } from "@mui/material";
+import { API_URL } from "../../config/api";
 
-export default function AddRiskDialog({ open, handleClose, parentId, nodeToEdit }) {
+export default function AddRiskDialog({
+  open,
+  handleClose,
+  parentId,
+  nodeToEdit,
+}) {
   const [formData, setFormData] = React.useState({
     name: "",
     description: "",
@@ -59,10 +65,11 @@ export default function AddRiskDialog({ open, handleClose, parentId, nodeToEdit 
     event.preventDefault();
     const isEdit = !!nodeToEdit;
     const payload = isEdit ? formData : { ...formData, parentId: parentId };
-    const url = isEdit 
-      ? `http://localhost:4000/api/risk-nodes/${nodeToEdit._id}`
-      : "http://localhost:4000/api/risk-nodes";
-    
+    const url =
+      isEdit ?
+        `${API_URL}/api/risk-nodes/${nodeToEdit._id}`
+      : `${API_URL}/api/risk-nodes`;
+
     try {
       const response = await fetch(url, {
         method: isEdit ? "PUT" : "POST",
@@ -76,11 +83,17 @@ export default function AddRiskDialog({ open, handleClose, parentId, nodeToEdit 
       }
       const result = await response.json();
       if (result.success) {
-        console.log(`Risk node ${isEdit ? 'updated' : 'created'} successfully:`, result.data);
+        console.log(
+          `Risk node ${isEdit ? "updated" : "created"} successfully:`,
+          result.data,
+        );
         handleClose();
         window.location.reload();
       } else {
-        alert(`Failed to ${isEdit ? 'update' : 'create'} RiskNode: ` + result.message);
+        alert(
+          `Failed to ${isEdit ? "update" : "create"} RiskNode: ` +
+            result.message,
+        );
       }
     } catch (error) {
       console.error("Error connecting to backend:", error);

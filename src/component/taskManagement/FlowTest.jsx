@@ -7,6 +7,7 @@ import {
   applyNodeChanges,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import { API_URL } from "../../config/api";
 
 // Import Custom Nodes
 import RootNode from "./RootNode";
@@ -42,17 +43,20 @@ export default function GRCReactFlow() {
   }, []);
 
   const handleDeleteNode = useCallback(async (id, type) => {
-    if (!window.confirm(`Are you sure you want to delete this ${type}?`)) return;
+    if (!window.confirm(`Are you sure you want to delete this ${type}?`))
+      return;
 
     const endpoint = type === "risk" ? "risk-nodes" : "control-nodes";
     try {
-      const response = await fetch(`http://localhost:4000/api/${endpoint}/${id}`, {
+      const response = await fetch(`${API_URL}/api/${endpoint}/${id}`, {
         method: "DELETE",
       });
       const result = await response.json();
       if (result.success) {
         setNodes((nds) => nds.filter((node) => node.id !== id));
-        setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+        setEdges((eds) =>
+          eds.filter((edge) => edge.source !== id && edge.target !== id),
+        );
       } else {
         alert("Failed to delete node: " + result.message);
       }
@@ -68,9 +72,9 @@ export default function GRCReactFlow() {
       try {
         // Use Promise.all to fetch all three endpoints concurrently
         const [rootRes, riskRes, controlRes] = await Promise.all([
-          fetch("http://localhost:4000/api/root-nodes"),
-          fetch("http://localhost:4000/api/risk-nodes"),
-          fetch("http://localhost:4000/api/control-nodes"),
+          fetch(`${API_URL}/api/root-nodes`),
+          fetch(`${API_URL}/api/risk-nodes`),
+          fetch(`${API_URL}/api/control-nodes`),
         ]);
 
         const rootData = await rootRes.json();
@@ -98,12 +102,12 @@ export default function GRCReactFlow() {
           id: item._id,
           type: "riskNode",
           position: { x: 400, y: index * 250 },
-          data: { 
-            ...item, 
-            title: item.name, 
+          data: {
+            ...item,
+            title: item.name,
             type: "Risk",
             onEdit: handleEditNode,
-            onDelete: handleDeleteNode
+            onDelete: handleDeleteNode,
           }, // Adapt BE 'name' to FE 'title'
         }));
 
@@ -123,12 +127,12 @@ export default function GRCReactFlow() {
           id: item._id,
           type: "controlNode",
           position: { x: 800, y: index * 250 },
-          data: { 
-            ...item, 
-            title: item.name, 
+          data: {
+            ...item,
+            title: item.name,
             type: "Control",
             onEdit: handleEditNode,
-            onDelete: handleDeleteNode
+            onDelete: handleDeleteNode,
           }, // Adapt BE 'name' to FE 'title'
         }));
 
