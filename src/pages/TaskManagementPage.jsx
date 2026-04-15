@@ -1,10 +1,10 @@
-import FlowTest from "../component/taskManagement/flowtest"
+import FlowTest from "../component/taskManagement/FlowTest";
 const TaskManagement = () => {
-    return (
-        <>
-            <FlowTest/>
-        </>
-    )
-}
+  return (
+    <>
+      <FlowTest />
+    </>
+  );
+};
 
-export default TaskManagement
+export default TaskManagement;
