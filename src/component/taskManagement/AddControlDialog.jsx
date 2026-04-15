@@ -1,4 +1,5 @@
 import * as React from "react";
+import { API_URL } from "../../config/api";
 import {
   Box,
   Grid,
@@ -30,7 +31,6 @@ export default function AddControlDialog({
     owner: "",
     status: "Active",
   });
-  import { API_URL } from "../../config/api";
 
   const [riskNodes, setRiskNodes] = React.useState([]);
 

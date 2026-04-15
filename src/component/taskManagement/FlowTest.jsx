@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
+import { API_URL } from "../../config/api";
 import {
   ReactFlow,
   Background,
@@ -7,7 +8,6 @@ import {
   applyNodeChanges,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { API_URL } from "../../config/api";
 
 // Import Custom Nodes
 import RootNode from "./RootNode";
