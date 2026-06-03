@@ -4,6 +4,8 @@ import MenuIcon from "@mui/icons-material/Menu";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ViewKanbanIcon from "@mui/icons-material/ViewKanban";
 import TableChartIcon from '@mui/icons-material/TableChart';
+import LogoutIcon from '@mui/icons-material/Logout';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import {
   Box,
   Button,
@@ -14,15 +16,18 @@ import {
   ListItemIcon,
   ListItemText,
   Paper,
-  
+  Divider,
+  Typography
 } from "@mui/material";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/authContext";
 
 const drawerWidth = 200
 
 export default function ResponsiveDrawerRight({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   const toggleDrawer = () => {
     setMobileOpen(!mobileOpen);
@@ -37,8 +42,15 @@ export default function ResponsiveDrawerRight({ children }) {
   ];
 
   const drawerContent = (
-    <Box sx={{ width: drawerWidth }} role="presentation">
-      <List sx={{ mt: 2 }  }>
+    <Box sx={{ width: drawerWidth, display: 'flex', flexDirection: 'column', height: '100%' }} role="presentation">
+      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+        <AccountCircleIcon color="primary" />
+        <Typography variant="subtitle1" noWrap>
+          {user?.name || "User"}
+        </Typography>
+      </Box>
+      <Divider />
+      <List sx={{ flexGrow: 1 }}>
         {menuItems.map((item) => (
           <ListItem key={item.text} disablePadding>
             <ListItemButton
@@ -50,6 +62,15 @@ export default function ResponsiveDrawerRight({ children }) {
             </ListItemButton>
           </ListItem>
         ))}
+      </List>
+      <Divider />
+      <List>
+        <ListItem disablePadding>
+          <ListItemButton onClick={logout}>
+            <ListItemIcon><LogoutIcon color="error" /></ListItemIcon>
+            <ListItemText primary="Logout" sx={{ color: 'error.main' }} />
+          </ListItemButton>
+        </ListItem>
       </List>
     </Box>
   );
