@@ -3,9 +3,9 @@ import ListAltIcon from "@mui/icons-material/ListAlt";
 import MenuIcon from "@mui/icons-material/Menu";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ViewKanbanIcon from "@mui/icons-material/ViewKanban";
-import TableChartIcon from '@mui/icons-material/TableChart';
-import LogoutIcon from '@mui/icons-material/Logout';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import TableChartIcon from "@mui/icons-material/TableChart";
+import LogoutIcon from "@mui/icons-material/Logout";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import {
   Box,
   Button,
@@ -17,17 +17,15 @@ import {
   ListItemText,
   Paper,
   Divider,
-  Typography
+  Typography,
 } from "@mui/material";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/authContext";
 
-const drawerWidth = 200
+const drawerWidth = 200;
 
 export default function ResponsiveDrawerRight({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { user, logout } = useAuth();
 
   const toggleDrawer = () => {
     setMobileOpen(!mobileOpen);
@@ -38,15 +36,22 @@ export default function ResponsiveDrawerRight({ children }) {
     { text: "Kanban", icon: <ViewKanbanIcon />, url: "/kanban" },
     { text: "Weather", icon: <CloudQueueIcon />, url: "/weather" },
     { text: "Wikipedia", icon: <MenuBookIcon />, url: "/wiki" },
-    { text: "TaskManagement", icon: <TableChartIcon/>, url: "/task"}
+    { text: "TaskManagement", icon: <TableChartIcon />, url: "/task" },
   ];
 
   const drawerContent = (
-    <Box sx={{ width: drawerWidth, display: 'flex', flexDirection: 'column', height: '100%' }} role="presentation">
-      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+    <Box
+      sx={{
+        width: drawerWidth,
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+      }}
+      role="presentation">
+      <Box sx={{ p: 2, display: "flex", alignItems: "center", gap: 1 }}>
         <AccountCircleIcon color="primary" />
         <Typography variant="subtitle1" noWrap>
-          {user?.name || "User"}
+          Long
         </Typography>
       </Box>
       <Divider />
@@ -64,19 +69,11 @@ export default function ResponsiveDrawerRight({ children }) {
         ))}
       </List>
       <Divider />
-      <List>
-        <ListItem disablePadding>
-          <ListItemButton onClick={logout}>
-            <ListItemIcon><LogoutIcon color="error" /></ListItemIcon>
-            <ListItemText primary="Logout" sx={{ color: 'error.main' }} />
-          </ListItemButton>
-        </ListItem>
-      </List>
     </Box>
   );
 
   return (
-    <Box  sx={{ display: "flex", }}>
+    <Box sx={{ display: "flex" }}>
       <Box
         component="main"
         sx={{
@@ -87,9 +84,6 @@ export default function ResponsiveDrawerRight({ children }) {
         {children}
       </Box>
 
-      {/* Mobile
-         display: { xs: "block", sm: "none" } hide when on PC but show on mobile
-      */}
       <Paper
         elevation={4}
         sx={{

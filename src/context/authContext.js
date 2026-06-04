@@ -1,13 +1,18 @@
 import { createContext, useContext } from "react";
 
+const defaultAuth = {
+  user: { name: "Long", email: "long@example.com" },
+  login: async () => ({ success: true }),
+  register: async () => ({ success: true }),
+  logout: () => {},
+};
 
-export const AuthContext = createContext(null);
+const AuthContext = createContext(defaultAuth);
 
+export const AuthProvider = ({ children }) => {
+  return children;
+};
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
+  return useContext(AuthContext);
 };

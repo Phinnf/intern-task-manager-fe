@@ -22,6 +22,8 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import InfoIcon from "@mui/icons-material/Info";
+import FileUploadIcon from "@mui/icons-material/FileUpload";
+import DownloadIcon from "@mui/icons-material/Download";
 import { useSelector, useDispatch } from "react-redux";
 import {
   fetchTodos,
@@ -30,6 +32,7 @@ import {
   toggleTodo,
   deleteTodoAPI,
 } from "../store/todoSlice";
+import { API_URL } from "../config/api";
 
 function TodoList() {
   const { items: todos, status, error } = useSelector((state) => state.todos);
@@ -77,13 +80,112 @@ function TodoList() {
     }
   };
 
+  const handleExportCSV = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/todos/export`);
+      if (!response.ok) throw new Error("Failed to export todos");
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "todos.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Export CSV Error:", error);
+      alert("Error exporting CSV: " + error.message);
+    }
+  };
+
+  const handleImportCSV = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const csvText = event.target?.result;
+        if (!csvText) throw new Error("Failed to read CSV file content");
+
+        const response = await fetch(`${API_URL}/api/todos/import`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/csv",
+          },
+          body: csvText,
+        });
+
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.message || "Failed to import CSV");
+        }
+
+        alert(result.message || "Imported successfully!");
+        dispatch(fetchTodos());
+      } catch (error) {
+        console.error("Import CSV Error:", error);
+        alert("Error importing CSV: " + error.message);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = ""; // Reset file input
+  };
+
   return (
     <Container maxWidth="md">
       <Paper elevation={3} sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2 }}>
         <Typography variant="h4" align="center" gutterBottom fontWeight="bold">
           Todo List
         </Typography>
-
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-around",
+            gap: 2,
+            mb: 2,
+          }}>
+          <Button
+            variant="outlined"
+            component="label"
+            startIcon={<FileUploadIcon />}
+            size="small"
+            sx={{
+              textTransform: "none",
+              borderRadius: "8px",
+              transition: "all 0.2s ease-in-out",
+              "&:hover": {
+                transform: "translateY(-1px)",
+              },
+            }}>
+            Import CSV
+            <input
+              type="file"
+              accept=".csv"
+              hidden
+              onChange={handleImportCSV}
+            />
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<DownloadIcon />}
+            size="small"
+            onClick={handleExportCSV}
+            disableElevation
+            sx={{
+              textTransform: "none",
+              borderRadius: "8px",
+              transition: "all 0.2s ease-in-out",
+              "&:hover": {
+                transform: "translateY(-1px)",
+              },
+            }}>
+            Export CSV
+          </Button>
+        </Box>
         {/* List Input:  */}
         <Box
           component="form"
@@ -110,6 +212,8 @@ function TodoList() {
             Add
           </Button>
         </Box>
+
+        {/* CSV Import/Export Actions */}
 
         <Divider sx={{ mb: 2 }} />
 
